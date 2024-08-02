@@ -4,6 +4,7 @@ import { PlusIcon } from 'lucide-react'
 
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { createInitials } from '@/utils/create-initials'
+import Image from 'next/image'
 
 interface HeaderProps {
   name?: string
@@ -14,7 +15,7 @@ export function Header({ imageUrl, name }: HeaderProps) {
   const initials = createInitials(name ?? 'user guest')
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-[#1c1c1c] shadow-shape">
-      <img src="/logo.svg" alt="plann.er" />
+      <Image src="/logo.svg" alt="plann.er" />
       <div className="flex items-center space-x-4">
         <button
           onClick={() => (window.location.href = '/')}

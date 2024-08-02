@@ -1,10 +1,11 @@
-import { Image, LoaderCircle, Trash2 } from 'lucide-react'
+import { Image as ImageIcon, LoaderCircle, Trash2 } from 'lucide-react'
 import { ChangeEvent, useState } from 'react'
 
 import { Button } from '@/components/button'
 
 import { toast } from 'sonner'
 import { uploadImage } from '@/app/server-actions/upload-image'
+import Image from 'next/image'
 
 interface UploadImageProsp {
   tripId: string
@@ -57,7 +58,7 @@ export function UploadImage({ tripId }: UploadImageProsp) {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Imagens</h2>
 
-        <Image
+        <ImageIcon
           role="icon-image"
           aria-label="icon-image"
           className="size-5 rounded-xl"
@@ -67,7 +68,7 @@ export function UploadImage({ tripId }: UploadImageProsp) {
       <div className="space-y-4">
         {imageUrl ? (
           <div className="space-y-4">
-            <img
+            <Image
               src={imageUrl}
               className="w-full"
               alt="foto da imagem que o usuario selecinou"
