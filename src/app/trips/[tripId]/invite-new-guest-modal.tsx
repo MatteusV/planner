@@ -2,6 +2,7 @@ import { Calendar, LoaderCircle, Tag, X } from 'lucide-react'
 import { FormEvent, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
+import { env } from '@/env'
 
 interface InviteNewGuestModalProps {
   closeInviteNewGuestModal: () => void
@@ -28,10 +29,13 @@ export function InviteNewGuestModal({
       name,
     }
 
-    const { status } = await fetch(`/api/trips/${tripId}/invites`, {
-      method: 'post',
-      body: JSON.stringify(payload),
-    })
+    const { status } = await fetch(
+      `${env.API_BASE_URL}/api/trips/${tripId}/invites`,
+      {
+        method: 'post',
+        body: JSON.stringify(payload),
+      },
+    )
 
     switch (status) {
       case 201:

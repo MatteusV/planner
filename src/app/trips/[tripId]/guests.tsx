@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 
 import { Button } from '@/components/button'
 import { InviteNewGuestModal } from './invite-new-guest-modal'
+import { env } from '@/env'
 
 interface Participant {
   id: string
@@ -23,7 +24,7 @@ export function Guests({ openManageGuestsModal }: GuestsProps) {
   const [isInviteNewGuestModal, setIsInviteNewGuestModal] = useState(false)
 
   useEffect(() => {
-    fetch(`/api/trips/${tripId}/participants`, {
+    fetch(`${env.API_BASE_URL}/api/trips/${tripId}/participants`, {
       method: 'GET',
     }).then(async (response) => {
       const responseJson = await response.json()

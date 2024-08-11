@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/button'
+import { env } from '@/env'
 import { AtSign, User } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { FormEvent } from 'react'
@@ -25,10 +26,13 @@ export function ModalGuest({ setIsGuest }: ModalGuest) {
       email,
     }
 
-    const { status } = await fetch(`/api/trips/${tripId}/verify`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
+    const { status } = await fetch(
+      `${env.API_BASE_URL}/api/trips/${tripId}/verify`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    )
 
     if (status === 200) {
       toast.success('Fique por dentro das atividades.')

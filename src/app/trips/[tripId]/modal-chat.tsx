@@ -17,6 +17,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { UserMessage } from '@/components/user-message'
 import { getParticipantByEmail } from '@/app/api/server-actions/get-participant-by-email'
 import { toast } from 'sonner'
+import { env } from '@/env'
 
 interface Message {
   content: string
@@ -84,7 +85,7 @@ export function ModalChat({ tripId }: ModalChatProps) {
         }
       })
     } else {
-      fetch('/api/user/token', {
+      fetch(`${env.API_BASE_URL}/api/user/token`, {
         method: 'GET',
       }).then(async (response) => {
         const responseJson = await response.json()

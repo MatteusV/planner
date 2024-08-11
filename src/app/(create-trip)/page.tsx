@@ -19,6 +19,7 @@ import { DestinationAndDateStep } from './steps/destination-and-date-step'
 import { InviteGuestsStep } from './steps/invite-guests-step'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { env } from '@/env'
 
 interface UsersToInvite {
   name: string
@@ -140,7 +141,7 @@ export default function CreateTripPage() {
       emails_to_invite: usersToInvite,
     }
 
-    const response = await fetch('/api/trips/create', {
+    const response = await fetch(`${env.API_BASE_URL}/api/trips/create`, {
       body: JSON.stringify(payload),
       method: 'POST',
     })

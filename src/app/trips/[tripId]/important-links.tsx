@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/button'
+import { env } from '@/env'
 
 interface Link {
   id: string
@@ -46,9 +47,12 @@ export function ImportantLinks({
   }, [tripId])
 
   async function handleRemoveLink(linkId: string) {
-    const { status } = await fetch(`/api/links/${linkId}/delete`, {
-      method: 'delete',
-    })
+    const { status } = await fetch(
+      `${env.API_BASE_URL}/api/links/${linkId}/delete`,
+      {
+        method: 'delete',
+      },
+    )
 
     if (status !== 200) {
       toast.error('Erro ao deletar o link.')

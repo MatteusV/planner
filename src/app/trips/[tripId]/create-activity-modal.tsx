@@ -3,6 +3,7 @@ import { Button } from '@/components/button'
 import { FormEvent } from 'react'
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
+import { env } from '@/env'
 
 interface CreateActivityModalProps {
   closeCreateActivityModal: () => void
@@ -26,10 +27,13 @@ export function CreateActivityModal({
       occurs_at,
     }
 
-    const { status } = await fetch(`/api/trips/${tripId}/activities/create`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
+    const { status } = await fetch(
+      `${env.API_BASE_URL}/api/trips/${tripId}/activities/create`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    )
 
     switch (status) {
       case 201:

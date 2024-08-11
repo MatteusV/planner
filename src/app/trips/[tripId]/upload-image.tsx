@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { uploadImage } from '@/app/api/server-actions/upload-image'
 import Image from 'next/image'
 import { DeleteImage } from '@/app/api/server-actions/delete-image'
+import { env } from '@/env'
 
 interface UploadImageProsp {
   tripId: string
@@ -22,13 +23,15 @@ export function UploadImage({ tripId, guestPayload }: UploadImageProsp) {
   const [imageFromDatabase, setImageFromDatabase] = useState<string | null>('')
 
   useEffect(() => {
-    fetch(`/api/trips/${tripId}/image`).then(async (response) => {
-      const responseJson = await response.json()
+    fetch(`${env.API_BASE_URL}/api/trips/${tripId}/image`).then(
+      async (response) => {
+        const responseJson = await response.json()
 
-      if (response.status === 200) {
-        setImageFromDatabase(responseJson.imageUrl)
-      }
-    })
+        if (response.status === 200) {
+          setImageFromDatabase(responseJson.imageUrl)
+        }
+      },
+    )
   }, [tripId])
 
   async function handleAddImageTrip() {
