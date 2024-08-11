@@ -33,10 +33,9 @@ export default function UserTripsPage() {
   useEffect(() => {
     const token = window.localStorage.getItem('token')
 
-    async function getDatas(token: string) {
+    async function getDatas() {
       const response = await fetch('/api/user/token', {
-        method: 'POST',
-        body: JSON.stringify({ token }),
+        method: 'GET',
       })
 
       const responseJson = await response.json()
@@ -49,7 +48,7 @@ export default function UserTripsPage() {
     }
 
     if (token) {
-      getDatas(token)
+      getDatas()
     } else {
       window.location.href = '/'
     }
@@ -60,7 +59,7 @@ export default function UserTripsPage() {
       <Header name={user?.name} imageUrl={user?.image_url} />
 
       <div className="px-6 py-4 space-y-8">
-        <div className="flex flex-col gap-y-3 items-center md:block">
+        <div className="flex max-sm:flex-col gap-y-3 items-center sm:flex sm:justify-between">
           <h1 className="font-bold text-3xl">Suas viagens:</h1>
           <button className="w-max bg-lime-400 text-black border-none rounded-md px-4 py-2 flex items-center gap-2 hover:bg-lime-500 md:hidden">
             <PlusIcon className="w-5 h-5 mr-2" />
@@ -82,7 +81,7 @@ export default function UserTripsPage() {
           ))}
           {trips?.length === 0 && (
             <p className="text-lg w-max font-semibold text-zinc-300">
-              Você não está participando de nenhuma viagem.
+              Você não tem nenhuma viagem criada.
             </p>
           )}
         </div>

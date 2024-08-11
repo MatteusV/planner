@@ -138,18 +138,26 @@ export default function CreateTripPage() {
       starts_at: eventStartAndEndDates.from,
       ends_at: eventStartAndEndDates.to,
       emails_to_invite: usersToInvite,
-      token: refreshToken,
     }
 
     const response = await fetch('/api/trips/create', {
       body: JSON.stringify(payload),
       method: 'POST',
     })
+
     const responseJson = await response.json()
 
-    if (response.status === 201) {
-      router.push(`/trips/${responseJson.tripId}`)
+    switch (response.status) {
+      case 201:
+        router.push(`/trips/${responseJson.tripId}`)
+        break
+
+      case 400:
+        toast.error('Erro ao criar a sua viagem.')
+        setCreateTripIsSubmitting(false)
+        break
     }
+
     setCreateTripIsSubmitting(false)
   }
 
@@ -161,7 +169,13 @@ export default function CreateTripPage() {
     <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
       <div className="max-w-3xl w-full px-6 text-center space-y-10">
         <div className="flex flex-col items-center gap-3">
-          <Image src="/logo.svg" alt="plann.er" />
+          <Image
+            src="/logo.svg"
+            alt="plann.er"
+            width={300}
+            height={300}
+            className="w-auto h-auto"
+          />
           <p className="text-zinc-300 text-lg">
             Convide seus amigos e planeje sua próxima viagem!
           </p>

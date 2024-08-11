@@ -38,8 +38,11 @@ export function LoginModal({ closeLoginModal }: LoginModalProps) {
       method: 'POST',
     })
 
-    const responseText = await response.text()
-    const responseJson = await JSON.parse(responseText)
+    if (response.ok === false) {
+      return toast.error('Erro ao cadastrar sua conta.')
+    }
+
+    const responseJson = await response.json()
 
     if (response.status === 200) {
       window.localStorage.setItem('token', responseJson.token)

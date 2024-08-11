@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body className={`${inter.className} bg-zinc-950 text-zinc-50`}>
-        <Toaster />
+        <Toaster theme="dark" />
         {children}
       </body>
     </html>

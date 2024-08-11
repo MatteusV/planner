@@ -1,9 +1,10 @@
 'use client'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { CircleCheck, CircleX } from 'lucide-react'
+import { CircleCheck, CircleX, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface Activity {
   date: string
@@ -15,9 +16,14 @@ interface Activity {
   }[]
 }
 
-export function Activities() {
+interface ActivitiesProps {
+  guestPayload?: { name: string; email: string }
+}
+
+export function Activities({ guestPayload }: ActivitiesProps) {
   const { tripId } = useParams()
   const [activities, setActivities] = useState<Activity[]>([])
+
   useEffect(() => {
     fetch(`/api/trips/${tripId}/activities`, {
       method: 'GET',
@@ -27,8 +33,24 @@ export function Activities() {
     })
   }, [tripId])
 
+  async function handleDeleteActivity(activityId: string) {
+    const { status } = await fetch(`/api/activities/${activityId}/delete`, {
+      method: 'DELETE',
+    })
+
+    if (status === 200) {
+      toast.success('Atividade deletada.')
+
+      setTimeout(() => {
+        window.location.reload()
+      }, 800)
+    } else {
+      toast.error('Não foi possivel deletar a atividade.')
+    }
+  }
+
   return (
-    <div className="space-y-8 overflow-y-scroll h-[calc(80vh-50px)]">
+    <div className="space-y-8 overflow-y-scroll max-md:h-72 lg:h-[calc(80vh-50px)]">
       {activities.length > 0 &&
         activities.map((category) => {
           return (
@@ -58,6 +80,22 @@ export function Activities() {
                           <span className="text-zinc-400 text-sm ml-auto">
                             {format(activity.occurs_at, 'HH:mm')}h
                           </span>
+                          <button
+                            onClick={() => handleDeleteActivity(activity.id)}
+                            title={
+                              activity.has_occurred || !!guestPayload
+                                ? 'você não tem permissão para excluir a atividade.'
+                                : 'excluir a atividade'
+                            }
+                            disabled={activity.has_occurred || !!guestPayload}
+                          >
+                            <Trash2
+                              data-disabled={
+                                activity.has_occurred || !!guestPayload
+                              }
+                              className="size-4 text-zinc-400 data-[disabled=true]:hover:text-zinc-400 hover:text-red-500 transition-all"
+                            />
+                          </button>
                         </div>
                       </div>
                     )

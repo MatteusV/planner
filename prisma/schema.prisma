@@ -9,17 +9,18 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String  @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  email     String  @unique
+  email     String    @unique
   password  String
-  image_url String?
+  image_url String    @default("https://virttxwzrakzgnfqqbdf.supabase.co/storage/v1/object/sign/profile-image/profile.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJwcm9maWxlLWltYWdlL3Byb2ZpbGUucG5nIiwiaWF0IjoxNzIzMzc5MjA2LCJleHAiOjE4ODEwNTkyMDZ9.YPtZGT07T9QRla3-DHcln6SjR4zWiwc49yF1qyDqQ04&t=2024-08-11T12%3A26%3A46.481Z")
   trips     Trip[]
+  Message   Message[]
 
   @@map("users")
 }
@@ -31,6 +32,7 @@ model Trip {
   ends_at     DateTime
   user_id     String
   image_url   String?
+  image_name  String?
 
   is_confirmed Boolean  @default(false)
   created_at   DateTime @default(now())
@@ -39,6 +41,7 @@ model Trip {
   activities   Activity[]
   links        Link[]
   user         User          @relation(fields: [user_id], references: [id])
+  Message      Message[]
 
   @@map("trips")
 }
@@ -46,13 +49,15 @@ model Trip {
 model Participant {
   id           String  @id @default(uuid())
   name         String?
-  email        String  @unique
+  email        String
   is_confirmed Boolean @default(false)
   is_owner     Boolean @default(false)
   trip_id      String
 
-  trip Trip @relation(fields: [trip_id], references: [id])
+  trip    Trip      @relation(fields: [trip_id], references: [id])
+  Message Message[]
 
+  @@unique([email, trip_id])
   @@map("participants")
 }
 
@@ -79,4 +84,19 @@ model Link {
   trip Trip @relation(fields: [trip_id], references: [id])
 
   @@map("links")
+}
+
+model Message {
+  id      String @id @default(uuid())
+  content String
+  trip_id String
+
+  user_id        String?
+  participant_id String?
+
+  created_at DateTime @default(now())
+
+  user        User?        @relation(fields: [user_id], references: [id])
+  participant Participant? @relation(fields: [participant_id], references: [id])
+  trip        Trip         @relation(fields: [trip_id], references: [id])
 }

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { PrismaClientValidationError } from '@prisma/client/runtime/library'
 import { revalidateTag } from 'next/cache'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -9,14 +10,27 @@ const requestParamsSchema = z.object({
 })
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: { tripId: string } },
 ) {
   const { tripId } = requestParamsSchema.parse(params)
 
+  const cookieStore = cookies()
+
+  const userToken = cookieStore.get('@planner:userToken')
+
+  if (!userToken) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
   try {
     await prisma.$transaction([
       prisma.participant.deleteMany({
+        where: {
+          trip_id: tripId,
+        },
+      }),
+      prisma.message.deleteMany({
         where: {
           trip_id: tripId,
         },

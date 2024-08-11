@@ -56,7 +56,7 @@ export async function POST(
     if (!link) {
       return NextResponse.json(
         { error: 'Não foi possivel criar o link' },
-        { status: 500 },
+        { status: 400 },
       )
     }
 
@@ -67,7 +67,9 @@ export async function POST(
   const token = cookiesStore.get('@planner:userToken')
 
   if (!token) {
-    return NextResponse.redirect('/')
+    const url = new URL(request.url)
+    const baseUrl = `${url.protocol}//${url.host}`
+    return NextResponse.redirect(`${baseUrl}/`)
   }
 
   const sign = jwt.decode(token.value) as tokenDecoded

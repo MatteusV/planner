@@ -15,6 +15,7 @@ import { ManageGuestsModal } from './manage-guests-modal'
 import { UploadImage } from './upload-image'
 import { useParams, useRouter } from 'next/navigation'
 import { ModalGuest } from './modal-guest'
+import { ModalChat } from './modal-chat'
 
 interface Activities {
   activities: {
@@ -32,20 +33,24 @@ export default function TripDetailsPage() {
   const { tripId } = useParams()
   const router = useRouter()
 
-  const [isGuest, setIsGuest] = useState(true)
+  const [isGuest, setIsGuest] = useState(false)
   const [guestPayload, setGuestPayload] = useState<Guest>()
 
   useEffect(() => {
     const token = window.localStorage.getItem('token')
 
-    if (token) {
-      setIsGuest(false)
-    }
-
     const guestPayload = window.localStorage.getItem('guest')
 
     if (guestPayload) {
       setGuestPayload(JSON.parse(guestPayload))
+    }
+
+    if (guestPayload && token) {
+      setIsGuest(false)
+    }
+
+    if (!token && !guestPayload) {
+      setIsGuest(true)
     }
   }, [])
 
@@ -88,6 +93,7 @@ export default function TripDetailsPage() {
 
   async function handleDeleteTrip() {
     setIsDeleteTripSending(true)
+
     const { status } = await fetch(`/api/trips/${tripId}/delete`, {
       method: 'delete',
     })
@@ -98,18 +104,23 @@ export default function TripDetailsPage() {
         setIsDeleteTripSending(false)
         setTimeout(() => {
           router.push('/user/trips')
-        }, 1000)
+        }, 700)
         break
 
       case 400:
         toast.success('Erro ao excluir a viagem.')
         setIsDeleteTripSending(false)
         break
+
+      case 401:
+        toast.error('Você não tem autorização para convidar.')
+        setIsDeleteTripSending(false)
+        break
     }
   }
 
   return (
-    <div className="max-w-6xl px-6 py-10 mx-auto space-y-8">
+    <div className="max-w-6xl px-6 py-4 mx-auto space-y-8 ">
       <DestinationAndDateHeader />
 
       <main className="flex gap-16 px-4 max-md:flex-col">
@@ -128,7 +139,7 @@ export default function TripDetailsPage() {
             </button>
           </div>
 
-          <Activities />
+          <Activities guestPayload={guestPayload} />
         </div>
 
         <div className="w-80 space-y-6">
@@ -141,8 +152,12 @@ export default function TripDetailsPage() {
           <Guests openManageGuestsModal={openManageGuestsModal} />
 
           <div className="w-full h-px bg-zinc-800" />
-          <UploadImage tripId={tripId!} />
-          <div className="w-full h-px bg-zinc-800" />
+          {!guestPayload && (
+            <>
+              <UploadImage guestPayload={!!guestPayload} tripId={tripId!} />
+              <div className="w-full h-px bg-zinc-800" />
+            </>
+          )}
 
           {isDeleteTripSending ? (
             <Button
@@ -158,7 +173,7 @@ export default function TripDetailsPage() {
               disabled={isGuest}
               onClick={handleDeleteTrip}
               size="full"
-              variant="secondary"
+              variant="destructive"
             >
               <Trash2 className="size-5 text-zinc-400" />
               Excluir viagem
@@ -185,6 +200,8 @@ export default function TripDetailsPage() {
       )}
 
       {isGuest && <ModalGuest setIsGuest={setIsGuest} />}
+
+      <ModalChat tripId={tripId} />
     </div>
   )
 }

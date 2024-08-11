@@ -29,8 +29,10 @@ export async function POST(
 
   const guestInTrip = await prisma.participant.findUnique({
     where: {
-      trip_id: trip.id,
-      email,
+      email_trip_id: {
+        email,
+        trip_id: tripId,
+      },
     },
   })
 

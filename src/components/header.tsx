@@ -15,7 +15,13 @@ export function Header({ imageUrl, name }: HeaderProps) {
   const initials = createInitials(name ?? 'user guest')
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-[#1c1c1c] shadow-shape">
-      <Image src="/logo.svg" alt="plann.er" />
+      <Image
+        src="/logo.svg"
+        alt="plann.er"
+        width={300}
+        height={300}
+        className="h-auto w-auto"
+      />
       <div className="flex items-center space-x-4">
         <button
           onClick={() => (window.location.href = '/')}

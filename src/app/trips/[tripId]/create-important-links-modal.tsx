@@ -31,7 +31,7 @@ export function CreateImportantLink({
       guestPayload: guestPayload ?? null,
     }
 
-    const { status } = await fetch(`/api/trips/${tripId}/links/create`, {
+    const { status } = await fetch(`/api/trips/${tripId}/links/create/`, {
       method: 'post',
       body: JSON.stringify(payload),
     })

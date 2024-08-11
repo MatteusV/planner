@@ -34,7 +34,7 @@ export async function DELETE(
       },
     })
 
-    revalidateTag('get-unique-trip')
+    revalidateTag('get-links')
     return NextResponse.json(
       { message: 'O link foi deletado.' },
       { status: 200 },

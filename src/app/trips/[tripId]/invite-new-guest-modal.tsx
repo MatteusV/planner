@@ -33,14 +33,23 @@ export function InviteNewGuestModal({
       body: JSON.stringify(payload),
     })
 
-    if (status === 201) {
-      toast.success('Convite enviado.')
-      setTimeout(() => {
-        window.location.reload()
-      }, 2000)
-    } else {
-      toast.error('Falha ao enviar o convite.')
+    switch (status) {
+      case 201:
+        toast.success('Convite enviado.')
+        setTimeout(() => {
+          window.location.reload()
+        }, 700)
+        break
+
+      case 400:
+        toast.error('Falha ao enviar o convite.')
+        break
+
+      case 401:
+        toast.error('Você não tem autorização para convidar.')
+        break
     }
+
     setIsDisabledButton(false)
   }
 

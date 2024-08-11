@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -17,6 +18,17 @@ export async function POST(
 ) {
   const { tripId } = requestParamsSchema.parse(params)
   const { occurs_at, title } = requestBodySchema.parse(await request.json())
+
+  const cookieStore = cookies()
+
+  const userToken = cookieStore.get('@planner:userToken')
+
+  if (!userToken) {
+    return NextResponse.json(
+      { error: 'Usuário não autorizado' },
+      { status: 401 },
+    )
+  }
 
   const trip = await prisma.trip.findUnique({
     where: {

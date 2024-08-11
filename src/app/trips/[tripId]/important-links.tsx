@@ -65,8 +65,9 @@ export function ImportantLinks({
       <div className="space-y-5">
         {links?.map((link) => (
           <div
+            title={`${link.owner_email} criou esse link`}
             key={link.id}
-            className="flex items-center justify-between gap-4"
+            className="flex items-center justify-between  max-w-full min-w-full"
           >
             <div className="space-y-1.5">
               <span className="block font-medium text-zinc-100">
@@ -84,12 +85,21 @@ export function ImportantLinks({
 
             <div className="flex gap-2.5">
               <Link2 className="text-zinc-400 size-5 shrink-0" />
-              <button
-                disabled={link.owner_email === guestPayload?.email}
-                onClick={() => handleRemoveLink(link.id)}
-              >
-                <Trash2 className="text-red-400 size-5 shrink-0" />
-              </button>
+              {guestPayload ? (
+                <button
+                  disabled={link.owner_email !== guestPayload?.email}
+                  onClick={() => handleRemoveLink(link.id)}
+                >
+                  <Trash2
+                    data-disabled={link.owner_email !== guestPayload?.email}
+                    className="text-red-400 size-5 shrink-0 data-[disabled=true]:text-zinc-400"
+                  />
+                </button>
+              ) : (
+                <button onClick={() => handleRemoveLink(link.id)}>
+                  <Trash2 className="text-red-400 size-5 shrink-0" />
+                </button>
+              )}
             </div>
           </div>
         ))}

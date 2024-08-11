@@ -35,6 +35,8 @@ export async function GET(
     'days',
   )
 
+  console.log(trip.activities)
+
   const activities = Array.from({
     length: differenceInDaysBetweenTripStartAndEnd + 1,
   }).map((_value, index) => {

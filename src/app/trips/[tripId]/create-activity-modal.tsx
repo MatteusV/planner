@@ -1,7 +1,7 @@
 import { Calendar, Tag, X } from 'lucide-react'
 import { Button } from '@/components/button'
 import { FormEvent } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
 
 interface CreateActivityModalProps {
@@ -12,7 +12,6 @@ export function CreateActivityModal({
   closeCreateActivityModal,
 }: CreateActivityModalProps) {
   const { tripId } = useParams()
-  const router = useRouter()
 
   async function createActivity(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -35,22 +34,21 @@ export function CreateActivityModal({
     switch (status) {
       case 201:
         toast.success('Atividade criada.')
-
         setTimeout(() => {
           window.location.reload()
-        }, 800)
+        }, 700)
         break
 
       case 400:
         toast.error('Não foi possivel achar a viagem no banco de dados.')
-
-        setTimeout(() => {
-          router.push(`/user/trips/`)
-        }, 800)
         break
 
       case 500:
         toast.error('Erro no nosso servidor, tente novamente mais tarde.')
+        break
+
+      case 401:
+        toast.error('Você não tem autorização para criar uma atividade.')
         break
     }
   }
@@ -90,7 +88,7 @@ export function CreateActivityModal({
               type="datetime-local"
               name="occurs_at"
               placeholder="Data e horário da atividade"
-              className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
+              className="text-zinc-300 bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
             />
           </div>
 

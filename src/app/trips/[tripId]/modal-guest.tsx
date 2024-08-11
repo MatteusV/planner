@@ -33,17 +33,14 @@ export function ModalGuest({ setIsGuest }: ModalGuest) {
     if (status === 200) {
       toast.success('Fique por dentro das atividades.')
       window.localStorage.setItem('guest', JSON.stringify(payload))
+      setIsGuest(false)
     } else {
       toast.error('Você não foi convidado para a viagem.')
-      setTimeout(() => {
-        window.location.href = '/'
-      }, 700)
+      setIsGuest(true)
     }
-
-    setIsGuest(false)
   }
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+    <div className="fixed inset-0 backdrop-blur bg-black/60 flex items-center justify-center">
       <div className="w-[640px] rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5">
         <div className="space-y-1.5">
           <h2 className="text-zinc-300">

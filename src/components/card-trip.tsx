@@ -49,7 +49,13 @@ export function CardTrip({
       <div className="bg-[#1c1c1c] space-y-14 rounded-lg overflow-hidden">
         <div className="h-40 bg-gradient-to-r from-[#a3e635] to-[#00b894] flex items-center justify-center">
           {image_url ? (
-            <Image src={image_url} alt="Imagem da viagem." />
+            <Image
+              src={image_url}
+              alt="Imagem da viagem."
+              width={300}
+              height={300}
+              className="w-full h-full"
+            />
           ) : (
             <PlaneIcon className="size-10" />
           )}

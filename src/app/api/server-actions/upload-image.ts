@@ -45,6 +45,7 @@ export async function uploadImage({ formData, tripId }: uploadImageProps) {
         },
         data: {
           image_url: imageData.data.publicUrl,
+          image_name: imageName,
         },
       })
       return { imageUrl: imageData.data.publicUrl }

@@ -5,6 +5,7 @@ import { z } from 'zod'
 import nodemailer from 'nodemailer'
 import { NextResponse } from 'next/server'
 import { env } from '@/env'
+import { cookies } from 'next/headers'
 
 const requestParamsSchema = z.object({
   tripId: z.string().uuid(),
@@ -22,6 +23,14 @@ export async function POST(
   const { tripId } = requestParamsSchema.parse(params)
 
   const { email, name } = requestBodySchema.parse(await request.json())
+
+  const cookieStore = cookies()
+
+  const userToken = cookieStore.get('@planner:userToken')
+
+  if (!userToken) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
 
   const trip = await prisma.trip.findUnique({
     where: {

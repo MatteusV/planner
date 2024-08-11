@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 import nodemailer from 'nodemailer'
 import { formattedDate } from '@/utils/formatted-date'
 import { env } from '@/env'
-import { tokenDecoded } from '@/@types/token-decoded'
+import { cookies } from 'next/headers'
 
 const requestBodySchema = z.object({
   destination: z.string().min(4),
@@ -22,18 +22,28 @@ const requestBodySchema = z.object({
       name: z.string(),
     }),
   ),
-  token: z.string(),
 })
 
 export async function POST(request: Request) {
-  const { destination, emails_to_invite, ends_at, starts_at, token } =
+  const { destination, emails_to_invite, ends_at, starts_at } =
     requestBodySchema.parse(await request.json())
 
-  const sign = decode(token) as tokenDecoded
+  const cookieStore = cookies()
+
+  const userToken = cookieStore.get('@planner:userToken')
+
+  if (!userToken) {
+    return NextResponse.json(
+      { message: 'Usuário não autorizado' },
+      { status: 400 },
+    )
+  }
+
+  const userId = decode(userToken.value) as string
 
   const user = await prisma.user.findUnique({
     where: {
-      id: sign.userId,
+      id: userId,
     },
   })
 
@@ -60,7 +70,10 @@ export async function POST(request: Request) {
   })
 
   if (!trip) {
-    throw new Error('Viagem não foi criada.')
+    return NextResponse.json(
+      { message: 'Viagem não foi criada.' },
+      { status: 400 },
+    )
   }
 
   const { formattedEndDate, formattedStartDate } = formattedDate({
