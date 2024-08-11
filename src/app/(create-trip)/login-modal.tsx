@@ -5,7 +5,6 @@ import { FormEvent, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '../../components/button'
-import { env } from '@/env'
 
 interface LoginModalProps {
   closeLoginModal: () => void
@@ -34,7 +33,7 @@ export function LoginModal({ closeLoginModal }: LoginModalProps) {
       password,
     }
 
-    const response = await fetch(`${env.API_BASE_URL}/api/user/register`, {
+    const response = await fetch(`/api/user/register`, {
       body: JSON.stringify(payload),
       method: 'POST',
     })
@@ -66,7 +65,7 @@ export function LoginModal({ closeLoginModal }: LoginModalProps) {
       email,
       password,
     }
-    const response = await fetch(`${env.API_BASE_URL}/api/user/auth`, {
+    const response = await fetch(`/api/user/auth`, {
       body: JSON.stringify(payload),
       method: 'POST',
     })

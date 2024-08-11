@@ -16,7 +16,6 @@ import { UploadImage } from './upload-image'
 import { useParams, useRouter } from 'next/navigation'
 import { ModalGuest } from './modal-guest'
 import { ModalChat } from './modal-chat'
-import { env } from '@/env'
 
 interface Activities {
   activities: {
@@ -95,12 +94,9 @@ export default function TripDetailsPage() {
   async function handleDeleteTrip() {
     setIsDeleteTripSending(true)
 
-    const { status } = await fetch(
-      `${env.API_BASE_URL}/api/trips/${tripId}/delete`,
-      {
-        method: 'delete',
-      },
-    )
+    const { status } = await fetch(`/api/trips/${tripId}/delete`, {
+      method: 'delete',
+    })
 
     switch (status) {
       case 200:

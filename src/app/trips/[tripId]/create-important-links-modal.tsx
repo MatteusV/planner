@@ -4,7 +4,6 @@ import { useParams, useRouter } from 'next/navigation'
 
 import { Button } from '@/components/button'
 import { toast } from 'sonner'
-import { env } from '@/env'
 
 interface CreateActivityModalProps {
   closeCreateImportantLinkModal: () => void
@@ -32,13 +31,10 @@ export function CreateImportantLink({
       guestPayload: guestPayload ?? null,
     }
 
-    const { status } = await fetch(
-      `${env.API_BASE_URL}/api/trips/${tripId}/links/create/`,
-      {
-        method: 'post',
-        body: JSON.stringify(payload),
-      },
-    )
+    const { status } = await fetch(`/api/trips/${tripId}/links/create/`, {
+      method: 'post',
+      body: JSON.stringify(payload),
+    })
 
     switch (status) {
       case 201:

@@ -5,7 +5,6 @@ import { CircleCheck, CircleX, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
-import { env } from '@/env'
 
 interface Activity {
   date: string
@@ -27,7 +26,7 @@ export function Activities({ guestPayload }: ActivitiesProps) {
 
   useEffect(() => {
     fetch(
-      `${env.API_BASE_URL}
+      `
       /api/trips/${tripId}/activities`,
       {
         method: 'GET',
@@ -39,12 +38,9 @@ export function Activities({ guestPayload }: ActivitiesProps) {
   }, [tripId])
 
   async function handleDeleteActivity(activityId: string) {
-    const { status } = await fetch(
-      `${env.API_BASE_URL}/api/activities/${activityId}/delete`,
-      {
-        method: 'DELETE',
-      },
-    )
+    const { status } = await fetch(`/api/activities/${activityId}/delete`, {
+      method: 'DELETE',
+    })
 
     if (status === 200) {
       toast.success('Atividade deletada.')

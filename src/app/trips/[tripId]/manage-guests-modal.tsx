@@ -14,7 +14,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { toast } from 'sonner'
-import { env } from '@/env'
 
 interface ManageGuestsModal {
   closeManageGuestsModal: () => void
@@ -35,7 +34,7 @@ export function ManageGuestsModal({
   const [guest, setGuest] = useState(false)
 
   useEffect(() => {
-    fetch(`${env.API_BASE_URL}/api/trips/${tripId}/participants`, {
+    fetch(`/api/trips/${tripId}/participants`, {
       method: 'GET',
     }).then(async (response) => {
       const responseJson = await response.json()
@@ -51,7 +50,7 @@ export function ManageGuestsModal({
 
   async function handleRemoveParticipant(participantId: string) {
     const { status } = await fetch(
-      `${env.API_BASE_URL}/api/participants/${participantId}/delete`,
+      `/api/participants/${participantId}/delete`,
       {
         method: 'delete',
       },

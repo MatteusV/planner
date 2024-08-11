@@ -3,7 +3,6 @@ import { ptBR } from 'date-fns/locale'
 import { ArrowLeftIcon, Calendar, MapPin } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { env } from '@/env'
 
 interface Trip {
   id: string
@@ -18,7 +17,7 @@ export function DestinationAndDateHeader() {
   const [trip, setTrip] = useState<Trip | undefined>()
 
   useEffect(() => {
-    fetch(`${env.API_BASE_URL}/api/trips/${tripId}/destination`, {
+    fetch(`/api/trips/${tripId}/destination`, {
       method: 'GET',
       cache: 'force-cache',
     }).then(async (response) => {
