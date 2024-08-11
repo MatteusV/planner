@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof PrismaClientKnownRequestError) {
       throw new Error('E-mail já foi cadastrado.')
     }
+    console.error(error)
     throw new Error(`${error}`)
   }
 }
