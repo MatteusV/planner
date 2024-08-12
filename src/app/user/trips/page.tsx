@@ -36,6 +36,7 @@ export default function UserTripsPage() {
     async function getDatas() {
       const response = await fetch('/api/user/token', {
         method: 'GET',
+        cache: 'no-cache',
       })
 
       const responseJson = await response.json()

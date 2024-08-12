@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer'
 import { formattedDate } from '@/utils/formatted-date'
 import { env } from '@/env'
 import { cookies } from 'next/headers'
+import { tokenDecoded } from '@/@types/token-decoded'
 
 const requestBodySchema = z.object({
   destination: z.string().min(4),
@@ -30,16 +31,16 @@ export async function POST(request: Request) {
 
   const cookieStore = cookies()
 
-  const userToken = cookieStore.get('@planner:userToken')
+  const token = cookieStore.get('@planner:userToken')
 
-  if (!userToken) {
+  if (!token) {
     return NextResponse.json(
       { message: 'Usuário não autorizado' },
       { status: 400 },
     )
   }
 
-  const userId = decode(userToken.value) as string
+  const { userId } = decode(token.value) as tokenDecoded
 
   const user = await prisma.user.findUnique({
     where: {

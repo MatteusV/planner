@@ -41,7 +41,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ token })
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
-      throw new Error('E-mail já foi cadastrado.')
+      if (error.code === 'P2002') {
+        return NextResponse.json(
+          { error: 'Email já cadastrado' },
+          {
+            status: 409,
+          },
+        )
+      }
     }
     console.error(error)
     throw new Error(`${error}`)
