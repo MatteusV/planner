@@ -2,6 +2,7 @@ import { Calendar, LoaderCircle, Tag, X } from 'lucide-react'
 import { FormEvent, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
+import { api } from '@/lib/axios'
 
 interface InviteNewGuestModalProps {
   closeInviteNewGuestModal: () => void
@@ -23,14 +24,9 @@ export function InviteNewGuestModal({
     const email = data.get('email')?.toString()
     const name = data.get('name')?.toString()
 
-    const payload = {
+    const { status } = await api.post(`participants/create/${tripId}/trip`, {
       email,
       name,
-    }
-
-    const { status } = await fetch(`/api/trips/${tripId}/invites`, {
-      method: 'post',
-      body: JSON.stringify(payload),
     })
 
     switch (status) {
@@ -41,12 +37,14 @@ export function InviteNewGuestModal({
         }, 700)
         break
 
-      case 400:
-        toast.error('Falha ao enviar o convite.')
+      case 409:
+        toast.error('Já existe um participante com este email')
+        closeInviteNewGuestModal()
         break
 
       case 401:
         toast.error('Você não tem autorização para convidar.')
+        closeInviteNewGuestModal()
         break
     }
 

@@ -14,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { toast } from 'sonner'
+import { api } from '@/lib/axios'
 
 interface ManageGuestsModal {
   closeManageGuestsModal: () => void
@@ -34,11 +35,8 @@ export function ManageGuestsModal({
   const [guest, setGuest] = useState(false)
 
   useEffect(() => {
-    fetch(`/api/trips/${tripId}/participants`, {
-      method: 'GET',
-    }).then(async (response) => {
-      const responseJson = await response.json()
-      setParticipants(responseJson.participants)
+    api.get(`/participants/fetch/${tripId}/trip`).then(({ data }) => {
+      setParticipants(data.participants)
     })
 
     const guestPayload = window.localStorage.getItem('guest')
@@ -49,21 +47,17 @@ export function ManageGuestsModal({
   }, [tripId])
 
   async function handleRemoveParticipant(participantId: string) {
-    const { status } = await fetch(
-      `/api/participants/${participantId}/delete`,
-      {
-        method: 'delete',
-      },
-    )
-
+    const { status } = await api.delete(`participants/${participantId}`)
     if (status === 200) {
       toast.success('Participante removido.')
-
       setParticipants((prevParticipants) =>
         prevParticipants?.filter(
           (participant) => participant.id !== participantId,
         ),
       )
+      setTimeout(() => window.location.reload(), 700)
+    } else {
+      toast.error('Erro ao remover o participante.')
     }
   }
 
@@ -115,9 +109,14 @@ export function ManageGuestsModal({
 
                 <TableCell className="space-x-4">
                   <button
-                    disabled={!!guest}
+                    disabled={guest}
                     onClick={() => handleRemoveParticipant(participant.id)}
                     className="text-red-500  disabled:text-gray-600"
+                    title={
+                      guest
+                        ? 'Você não pode remover nenhum participante.'
+                        : 'Remover participante.'
+                    }
                   >
                     <Trash2 className="size-5 " />
                   </button>

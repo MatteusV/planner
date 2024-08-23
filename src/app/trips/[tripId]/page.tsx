@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/button'
-import { Activities } from './activities'
+import { Activities as ActivitiesComponent } from './activities'
 import { CreateActivityModal } from './create-activity-modal'
 import { CreateImportantLink } from './create-important-links-modal'
 import { DestinationAndDateHeader } from './destination-and-date-header'
@@ -16,43 +16,104 @@ import { UploadImage } from './upload-image'
 import { useParams, useRouter } from 'next/navigation'
 import { ModalGuest } from './modal-guest'
 import { ModalChat } from './modal-chat'
-
-interface Activities {
-  activities: {
-    date: Date
-    activities: string[]
-  }
-}
+import { getCookie } from '@/app/api/server-actions/get-cookie'
+import { api } from '@/lib/axios'
 
 interface Guest {
   name: string
   email: string
 }
 
+interface Activities {
+  date: string
+  activities: [
+    {
+      id: string
+      title: string
+      occurs_at: string
+      has_occurred: false
+    },
+  ]
+}
+
+interface Link {
+  id: string
+  title: string
+  url: string
+  trip_id: string
+  owner_email: string
+  owner_name: string
+}
+
+interface Participant {
+  id: string
+  name: string | null
+  email: string
+  is_confirmed: boolean
+}
+
+interface Trip {
+  id: string
+  destination: string
+  starts_at: Date | string
+  ends_at: Date | string
+  user_id: string
+  image_url: string | null
+  image_name: string | null
+  is_confirmed: boolean
+  created_at: Date | string
+
+  participants?: Participant[]
+  links?: Link[]
+  activities?: Activities[]
+}
+
 export default function TripDetailsPage() {
   const { tripId } = useParams()
-  const router = useRouter()
 
-  const [isGuest, setIsGuest] = useState(false)
+  const [activities, setActivities] = useState<Activities[]>()
+  const [links, setLinks] = useState<Link[]>()
+  const [participants, setParticipants] = useState<Participant[]>()
+  const [trip, setTrip] = useState<Trip>()
+
+  const [openModalGuest, setOpenModalGuest] = useState(false)
   const [guestPayload, setGuestPayload] = useState<Guest>()
 
+  const router = useRouter()
   useEffect(() => {
-    const token = window.localStorage.getItem('token')
+    async function fetchData() {
+      const { data, status } = await api.get(
+        `http://localhost:3000/trips/${tripId}`,
+      )
 
-    const guestPayload = window.localStorage.getItem('guest')
+      if (status === 404) {
+        toast.error('Viagem não foi encontrada.')
+      }
 
-    if (guestPayload) {
-      setGuestPayload(JSON.parse(guestPayload))
+      setTrip(data.trip)
+      setActivities(data.trip.activities)
+      setLinks(data.trip.links)
+      setParticipants(data.trip.participants)
     }
 
-    if (guestPayload && token) {
-      setIsGuest(false)
-    }
+    fetchData()
 
-    if (!token && !guestPayload) {
-      setIsGuest(true)
-    }
-  }, [])
+    getCookie({ title: '@planner:tokenJwt' }).then(({ tokenJwt }) => {
+      const guestPayload = window.localStorage.getItem('guest')
+
+      if (guestPayload) {
+        setGuestPayload(JSON.parse(guestPayload))
+      }
+
+      if (guestPayload && tokenJwt) {
+        setOpenModalGuest(false)
+      }
+
+      if (!tokenJwt && !guestPayload) {
+        setOpenModalGuest(true)
+      }
+    })
+  }, [tripId])
 
   if (typeof tripId === 'object') {
     throw new Error('trip not found')
@@ -94,9 +155,7 @@ export default function TripDetailsPage() {
   async function handleDeleteTrip() {
     setIsDeleteTripSending(true)
 
-    const { status } = await fetch(`/api/trips/${tripId}/delete`, {
-      method: 'delete',
-    })
+    const { status } = await api.delete(`trips/${tripId}`)
 
     switch (status) {
       case 200:
@@ -107,13 +166,13 @@ export default function TripDetailsPage() {
         }, 700)
         break
 
-      case 400:
+      case 500:
         toast.success('Erro ao excluir a viagem.')
         setIsDeleteTripSending(false)
         break
 
       case 401:
-        toast.error('Você não tem autorização para convidar.')
+        toast.error('Você não tem autorização para excluir a viagem.')
         setIsDeleteTripSending(false)
         break
     }
@@ -121,7 +180,12 @@ export default function TripDetailsPage() {
 
   return (
     <div className="max-w-6xl px-6 py-4 mx-auto space-y-8 ">
-      <DestinationAndDateHeader />
+      <DestinationAndDateHeader
+        destination={trip?.destination}
+        ends_at={trip?.ends_at}
+        starts_at={trip?.starts_at}
+        key={trip?.id}
+      />
 
       <main className="flex gap-16 px-4 max-md:flex-col">
         <div className="flex-1 space-y-6">
@@ -139,19 +203,29 @@ export default function TripDetailsPage() {
             </button>
           </div>
 
-          <Activities guestPayload={guestPayload} />
+          <ActivitiesComponent
+            activities={activities!}
+            guestPayload={guestPayload}
+          />
         </div>
 
         <div className="w-80 space-y-6">
           <ImportantLinks
+            links={links!}
             openCreateImportantLinkModal={openCreateImportantLinkModal}
           />
 
           <div className="w-full h-px bg-zinc-800" />
 
-          <Guests openManageGuestsModal={openManageGuestsModal} />
+          <Guests
+            participants={participants!}
+            openManageGuestsModal={openManageGuestsModal}
+          />
 
-          <div className="w-full h-px bg-zinc-800" />
+          <div
+            data-hidden={!!guestPayload}
+            className="w-full h-px bg-zinc-800 data-[hidden=true]:hidden"
+          />
           {!guestPayload && (
             <>
               <UploadImage guestPayload={!!guestPayload} tripId={tripId!} />
@@ -170,10 +244,9 @@ export default function TripDetailsPage() {
             </Button>
           ) : (
             <Button
-              disabled={isGuest}
               onClick={handleDeleteTrip}
               size="full"
-              variant="destructive"
+              variant={guestPayload ? 'disabled' : 'destructive'}
             >
               <Trash2 className="size-5 text-zinc-400" />
               Excluir viagem
@@ -199,7 +272,7 @@ export default function TripDetailsPage() {
         <ManageGuestsModal closeManageGuestsModal={closeManageGuestsModal} />
       )}
 
-      {isGuest && <ModalGuest setIsGuest={setIsGuest} />}
+      {openModalGuest && <ModalGuest setOpenModalGuest={setOpenModalGuest} />}
 
       <ModalChat tripId={tripId} />
     </div>

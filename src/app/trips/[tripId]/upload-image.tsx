@@ -6,9 +6,8 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { Button } from '@/components/button'
 
 import { toast } from 'sonner'
-import { uploadImage } from '@/app/api/server-actions/upload-image'
 import Image from 'next/image'
-import { DeleteImage } from '@/app/api/server-actions/delete-image'
+import { api } from '@/lib/axios'
 
 interface UploadImageProsp {
   tripId: string
@@ -22,11 +21,11 @@ export function UploadImage({ tripId, guestPayload }: UploadImageProsp) {
   const [imageFromDatabase, setImageFromDatabase] = useState<string | null>('')
 
   useEffect(() => {
-    fetch(`/api/trips/${tripId}/image`).then(async (response) => {
-      const responseJson = await response.json()
+    api(`/trips/${tripId}`).then(({ data, status }) => {
+      const imageUrl = data.trip.image_url
 
-      if (response.status === 200) {
-        setImageFromDatabase(responseJson.imageUrl)
+      if (status === 200) {
+        setImageFromDatabase(imageUrl)
       }
     })
   }, [tripId])
@@ -39,25 +38,25 @@ export function UploadImage({ tripId, guestPayload }: UploadImageProsp) {
 
     const formData = new FormData()
     formData.append('image', image)
+    const teste = formData.get('image')
 
-    const response = await uploadImage({ formData, tripId })
+    const { status, data } = await api.post(`/trips/${tripId}/image`, {
+      teste,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
 
-    if (response?.notAuthorized) {
-      toast.error(response.notAuthorized)
+    if (status !== 200) {
+      toast.error('Erro ao fazer o upload da imagem')
     }
 
-    if (response?.tripNotFound) {
+    if (status === 404) {
       toast.error('Erro ao achar a viagem.')
     }
 
-    if (response?.imageUrl) {
+    if (data.imageUrl) {
       toast.success('Imagem salva.')
-    }
-
-    if (response?.error) {
-      toast.error('Erro ao salvar a imagem.', {
-        descriptionClassName: `${response.error}`,
-      })
     }
 
     setFormIsSubmitting(false)
@@ -71,24 +70,21 @@ export function UploadImage({ tripId, guestPayload }: UploadImageProsp) {
   async function handleRemoveImageFromDatabase() {
     setImageFromDatabase('')
 
-    const { error, imageNameNotFound, success, tripNotFound } =
-      await DeleteImage({ tripId })
+    // if (error) {
+    //   toast.error(error)
+    // }
 
-    if (error) {
-      toast.error(error)
-    }
+    // if (imageNameNotFound) {
+    //   toast.error('Não foi possivel encontrar o nome da imagem para deletar.')
+    // }
 
-    if (imageNameNotFound) {
-      toast.error('Não foi possivel encontrar o nome da imagem para deletar.')
-    }
+    // if (success) {
+    //   toast.success('Imagem deletada com sucesso.')
+    // }
 
-    if (success) {
-      toast.success('Imagem deletada com sucesso.')
-    }
-
-    if (tripNotFound) {
-      toast.error('Não foi possivel encontrar a viagem no banco de dados.')
-    }
+    // if (tripNotFound) {
+    //   toast.error('Não foi possivel encontrar a viagem no banco de dados.')
+    // }
   }
 
   return (

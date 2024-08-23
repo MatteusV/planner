@@ -1,16 +1,17 @@
 'use client'
 
 import { Button } from '@/components/button'
+import { api } from '@/lib/axios'
 import { AtSign, User } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { FormEvent } from 'react'
 import { toast } from 'sonner'
 
 interface ModalGuest {
-  setIsGuest: (isGuest: boolean) => void
+  setOpenModalGuest: (isGuest: boolean) => void
 }
 
-export function ModalGuest({ setIsGuest }: ModalGuest) {
+export function ModalGuest({ setOpenModalGuest }: ModalGuest) {
   const { tripId } = useParams()
 
   async function handleSaveGuest(event: FormEvent<HTMLFormElement>) {
@@ -24,19 +25,19 @@ export function ModalGuest({ setIsGuest }: ModalGuest) {
       name,
       email,
     }
+    const { status, ...response } = await api.post(
+      `trips/verify/participant/${tripId}`,
+      payload,
+    )
 
-    const { status } = await fetch(`/api/trips/${tripId}/verify`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
-
-    if (status === 200) {
+    if (status !== 401) {
       toast.success('Fique por dentro das atividades.')
-      window.localStorage.setItem('guest', JSON.stringify(payload))
-      setIsGuest(false)
-    } else {
+      const participant = response.data.participant
+      window.localStorage.setItem('guest', JSON.stringify(participant))
+      setOpenModalGuest(false)
+    } else if (status === 401) {
       toast.error('Você não foi convidado para a viagem.')
-      setIsGuest(true)
+      setOpenModalGuest(true)
     }
   }
   return (

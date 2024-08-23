@@ -1,7 +1,6 @@
 import { Link2, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/button'
 
@@ -16,6 +15,7 @@ interface Link {
 
 interface ImportantLinkProps {
   openCreateImportantLinkModal: () => void
+  links: Link[]
 }
 
 interface Guest {
@@ -25,19 +25,12 @@ interface Guest {
 
 export function ImportantLinks({
   openCreateImportantLinkModal,
+  links,
 }: ImportantLinkProps) {
   const { tripId } = useParams()
-  const [links, setLinks] = useState<Link[]>()
   const [guestPayload, setGuestPayload] = useState<Guest>()
 
   useEffect(() => {
-    fetch(`/api/trips/${tripId}/links`, {
-      method: 'GET',
-    }).then(async (response) => {
-      const responseJson = await response.json()
-      setLinks(responseJson.links)
-    })
-
     const guest = window.localStorage.getItem('guest')
 
     if (guest) {
@@ -46,16 +39,11 @@ export function ImportantLinks({
   }, [tripId])
 
   async function handleRemoveLink(linkId: string) {
-    const { status } = await fetch(`/api/links/${linkId}/delete`, {
-      method: 'delete',
-    })
-
-    if (status !== 200) {
-      toast.error('Erro ao deletar o link.')
-      return
-    }
-
-    setLinks((prevLinks) => prevLinks?.filter((link) => link.id !== linkId))
+    console.log(linkId)
+    // if (status !== 200) {
+    //   toast.error('Erro ao deletar o link.')
+    //   return
+    // }
   }
 
   return (

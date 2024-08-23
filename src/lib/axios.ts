@@ -1,4 +1,12 @@
-import { env } from '@/env'
-import { Axios } from 'axios'
+import Axios from 'axios'
+import { setupCache } from 'axios-cache-interceptor'
 
-export const api = new Axios({ baseURL: `${env.API_BASE_URL}` })
+const instance = Axios.create({
+  baseURL: 'http://localhost:3000',
+  withCredentials: true,
+})
+const axios = setupCache(instance, {
+  debug: console.log,
+})
+
+export const api = axios

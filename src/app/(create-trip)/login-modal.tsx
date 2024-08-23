@@ -1,16 +1,14 @@
 'use client'
 
-import { AtSign, Eye, EyeOff, LockKeyhole, User, X } from 'lucide-react'
+import { AtSign, Eye, EyeOff, LockKeyhole, User } from 'lucide-react'
 import { FormEvent, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '../../components/button'
+import { api } from '@/lib/axios'
+import { getCookie } from '../api/server-actions/get-cookie'
 
-interface LoginModalProps {
-  closeLoginModal: () => void
-}
-
-export function LoginModal({ closeLoginModal }: LoginModalProps) {
+export function LoginModal() {
   const [showPassword, setShowPassword] = useState(false)
   const [valuePassword, setValuePassword] = useState('')
   const [showRegister, setShowRegister] = useState(true)
@@ -18,68 +16,50 @@ export function LoginModal({ closeLoginModal }: LoginModalProps) {
   async function handleRegisterUser(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const data = new FormData(event.currentTarget)
-    const email = data.get('email')?.toString()
-    const name = data.get('name')?.toString()
-    const password = data.get('password')?.toString()
+    const dataForm = new FormData(event.currentTarget)
+    const email = dataForm.get('email')?.toString()
+    const name = dataForm.get('name')?.toString()
+    const password = dataForm.get('password')?.toString()
 
     if (!name || !email || !password) {
       return toast.error('Preencha todos os campos.')
     }
 
-    const payload = {
+    const { status } = await api.post('/users', {
       email,
       name,
       password,
-    }
-
-    const response = await fetch(`/api/user/register`, {
-      body: JSON.stringify(payload),
-      method: 'POST',
     })
 
-    if (response.ok === false) {
+    if (status !== 201) {
       return toast.error('Erro ao cadastrar sua conta.')
     }
 
-    const responseJson = await response.json()
-
-    if (response.status === 200) {
-      window.localStorage.setItem('token', responseJson.token)
-      toast.success('Registrado com sucesso.')
-
-      setTimeout(() => {
-        window.location.href = '/'
-      }, 1000)
-    }
+    toast.success('Faça o login na sua conta.')
   }
 
   async function handleLoginUser(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const data = new FormData(event.currentTarget)
-    const email = data.get('email')?.toString()
-    const password = data.get('password')?.toString()
+    const dataForm = new FormData(event.currentTarget)
+    const email = dataForm.get('email')?.toString()
+    const password = dataForm.get('password')?.toString()
 
-    const payload = {
+    const { status } = await api.post('/auth', {
       email,
       password,
-    }
-    const response = await fetch(`/api/user/auth`, {
-      body: JSON.stringify(payload),
-      method: 'POST',
     })
 
-    const responseJson = await response.json()
-
-    if (response.status === 200) {
-      console.log({ responseJson })
-      window.localStorage.setItem('token', responseJson.token)
+    if (status === 200) {
       toast.success('Login feito com sucesso.')
+      const { tokenJwt } = await getCookie({ title: '@planner:tokenJwt' })
 
-      setTimeout(() => {
-        window.location.reload()
-      }, 1000)
+      if (!tokenJwt) {
+        toast.error('Erro ao salvar os cookies.')
+      }
+      toast.success('Login feito.')
+
+      setTimeout(() => window.location.reload(), 700)
     }
   }
 
@@ -90,9 +70,6 @@ export function LoginModal({ closeLoginModal }: LoginModalProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h2 className="font-lg font-semibold">Primeiro crie sua conta</h2>
-              <button>
-                <X className="size-5 text-zinc-400" onClick={closeLoginModal} />
-              </button>
             </div>
 
             <p className="text-sm text-zinc-400">
@@ -164,9 +141,6 @@ export function LoginModal({ closeLoginModal }: LoginModalProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h2 className="font-lg font-semibold">Primeiro faça o login</h2>
-              <button>
-                <X className="size-5 text-zinc-400" onClick={closeLoginModal} />
-              </button>
             </div>
 
             <p className="text-sm text-zinc-400">

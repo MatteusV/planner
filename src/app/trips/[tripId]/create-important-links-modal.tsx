@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 
 import { Button } from '@/components/button'
 import { toast } from 'sonner'
+import { api } from '@/lib/axios'
 
 interface CreateActivityModalProps {
   closeCreateImportantLinkModal: () => void
@@ -25,15 +26,10 @@ export function CreateImportantLink({
     const url = data.get('url')?.toString()
     const title = data.get('title')?.toString()
 
-    const payload = {
+    const { status } = await api.post(`/links/${tripId}/trip`, {
       title,
       url,
       guestPayload: guestPayload ?? null,
-    }
-
-    const { status } = await fetch(`/api/trips/${tripId}/links/create/`, {
-      method: 'post',
-      body: JSON.stringify(payload),
     })
 
     switch (status) {
@@ -49,7 +45,7 @@ export function CreateImportantLink({
         toast.error('Erro ao criar o link, tente novamente mais tarde.')
         break
 
-      case 400:
+      case 404:
         toast.error('Erro ao encontrar a viagem.')
         router.push('/user/trips')
         break

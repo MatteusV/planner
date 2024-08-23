@@ -19,6 +19,8 @@ import { DestinationAndDateStep } from './steps/destination-and-date-step'
 import { InviteGuestsStep } from './steps/invite-guests-step'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { api } from '@/lib/axios'
+import { getCookie } from '../api/server-actions/get-cookie'
 
 interface UsersToInvite {
   name: string
@@ -43,14 +45,15 @@ export default function CreateTripPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const token = window.localStorage.getItem('token')
-
-    if (token) {
-      setRefreshToken(token)
-      setIsLoginModalOpen(false)
-    } else {
-      setIsLoginModalOpen(true)
-    }
+    getCookie({ title: '@planner:tokenJwt' }).then((response) => {
+      const { tokenJwt } = response
+      if (tokenJwt) {
+        setRefreshToken(tokenJwt.value)
+        setIsLoginModalOpen(false)
+      } else {
+        setIsLoginModalOpen(true)
+      }
+    })
   }, [])
 
   function openGuestsInput() {
@@ -133,23 +136,19 @@ export default function CreateTripPage() {
 
     setCreateTripIsSubmitting(true)
 
-    const payload = {
+    const {
+      data: { trip },
+      status,
+    } = await api.post(`/trips`, {
       destination,
       starts_at: eventStartAndEndDates.from,
       ends_at: eventStartAndEndDates.to,
       emails_to_invite: usersToInvite,
-    }
-
-    const response = await fetch(`/api/trips/create`, {
-      body: JSON.stringify(payload),
-      method: 'POST',
     })
 
-    const responseJson = await response.json()
-
-    switch (response.status) {
+    switch (status) {
       case 201:
-        router.push(`/trips/${responseJson.tripId}`)
+        router.push(`/trips/${trip.id}`)
         break
 
       case 400:
@@ -159,10 +158,6 @@ export default function CreateTripPage() {
     }
 
     setCreateTripIsSubmitting(false)
-  }
-
-  function closeLoginModal() {
-    setIsLoginModalOpen(false)
   }
 
   return (
@@ -270,7 +265,7 @@ export default function CreateTripPage() {
         />
       )}
 
-      {isLoginModalOpen && <LoginModal closeLoginModal={closeLoginModal} />}
+      {isLoginModalOpen && <LoginModal />}
     </div>
   )
 }

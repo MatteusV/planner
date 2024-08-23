@@ -15,21 +15,14 @@ interface Participant {
 
 interface GuestsProps {
   openManageGuestsModal: () => void
+  participants: Participant[]
 }
 
-export function Guests({ openManageGuestsModal }: GuestsProps) {
+export function Guests({ openManageGuestsModal, participants }: GuestsProps) {
   const { tripId } = useParams()
-  const [participants, setParticipants] = useState<Participant[]>([])
   const [isInviteNewGuestModal, setIsInviteNewGuestModal] = useState(false)
 
-  useEffect(() => {
-    fetch(`/api/trips/${tripId}/participants`, {
-      method: 'GET',
-    }).then(async (response) => {
-      const responseJson = await response.json()
-      setParticipants(responseJson.participants)
-    })
-  }, [tripId])
+  useEffect(() => {}, [tripId])
 
   function openInviteNewGuestModal() {
     setIsInviteNewGuestModal(true)
@@ -37,6 +30,10 @@ export function Guests({ openManageGuestsModal }: GuestsProps) {
 
   function closeInviteNewGuestModal() {
     setIsInviteNewGuestModal(false)
+  }
+
+  if (!participants || participants.length === 0) {
+    return <div>Carregando...</div>
   }
 
   return (

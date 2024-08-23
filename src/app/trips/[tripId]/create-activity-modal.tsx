@@ -3,6 +3,7 @@ import { Button } from '@/components/button'
 import { FormEvent } from 'react'
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
+import { api } from '@/lib/axios'
 
 interface CreateActivityModalProps {
   closeCreateActivityModal: () => void
@@ -21,14 +22,9 @@ export function CreateActivityModal({
     const title = data.get('title')?.toString()
     const occurs_at = data.get('occurs_at')?.toString()
 
-    const payload = {
+    const { status } = await api.post(`activities/${tripId}/trip`, {
       title,
       occurs_at,
-    }
-
-    const { status } = await fetch(`/api/trips/${tripId}/activities/create`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
     })
 
     switch (status) {
@@ -39,8 +35,8 @@ export function CreateActivityModal({
         }, 700)
         break
 
-      case 400:
-        toast.error('Não foi possivel achar a viagem no banco de dados.')
+      case 404:
+        toast.error('Não foi possivel achar a viagem.')
         break
 
       case 500:

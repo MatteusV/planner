@@ -1,36 +1,26 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import dayjs from 'dayjs'
 import { ArrowLeftIcon, Calendar, MapPin } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
-interface Trip {
-  id: string
-  destination: string
-  starts_at: string
-  ends_at: string
-  is_confirmed: boolean
+interface DestinationAndDateHeaderProps {
+  destination?: string
+  starts_at?: string | Date
+  ends_at?: string | Date
 }
 
-export function DestinationAndDateHeader() {
-  const { tripId } = useParams()
-  const [trip, setTrip] = useState<Trip | undefined>()
+export function DestinationAndDateHeader({
+  destination,
+  ends_at,
+  starts_at,
+}: DestinationAndDateHeaderProps) {
+  const startsAt = dayjs(starts_at).toDate()
+  const endsAt = dayjs(ends_at).toDate()
 
-  useEffect(() => {
-    fetch(`/api/trips/${tripId}/destination`, {
-      method: 'GET',
-      cache: 'force-cache',
-    }).then(async (response) => {
-      const responseJson = await response.json()
-      setTrip(responseJson.trip)
-    })
-  }, [tripId])
-
-  const displayedDate = trip
-    ? format(trip.starts_at, "d' de 'LLL", { locale: ptBR })
-        .concat(' até ')
-        .concat(format(trip.ends_at, "d' de 'LLL", { locale: ptBR }))
-    : null
+  const displayedDate = format(startsAt, "d' de 'LLL", { locale: ptBR })
+    .concat(' até ')
+    .concat(format(endsAt, "d' de 'LLL", { locale: ptBR }))
   const router = useRouter()
 
   return (
@@ -45,7 +35,7 @@ export function DestinationAndDateHeader() {
         </button>
         <div className="flex items-center gap-2">
           <MapPin className="size-5 text-zinc-400" />
-          <span className="text-zinc-100">{trip?.destination}</span>
+          <span className="text-zinc-100">{destination}</span>
         </div>
       </div>
 

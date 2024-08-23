@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react'
 
 import { CardTrip } from '@/components/card-trip'
 import { Header } from '@/components/header'
+import { getCookie } from '@/app/api/server-actions/get-cookie'
+import { api } from '@/lib/axios'
+import { toast } from 'sonner'
 
 interface UserProps {
   id: string
@@ -31,27 +34,25 @@ export default function UserTripsPage() {
   const [trips, setTrips] = useState<TripsProps[]>()
 
   useEffect(() => {
-    const token = window.localStorage.getItem('token')
+    getCookie({ title: '@planner:tokenJwt' }).then(({ tokenJwt }) => {
+      if (tokenJwt) {
+        getDatas()
+      } else {
+        window.location.href = '/'
+      }
+    })
 
     async function getDatas() {
-      const response = await fetch('/api/user/token', {
-        method: 'GET',
-        cache: 'no-cache',
-      })
-
-      const responseJson = await response.json()
-      setUser(responseJson.user)
-
-      if (responseJson.trips === null) {
-        return
+      const { data: userData, status } = await api.get('auth/profile')
+      if (status === 401) {
+        toast.error('Você não está logado.')
+        setTimeout(() => (window.location.href = '/'), 700)
+      } else {
+        setUser(userData.user)
       }
-      setTrips(responseJson.trips)
-    }
 
-    if (token) {
-      getDatas()
-    } else {
-      window.location.href = '/'
+      const { data: tripsData } = await api.get('trips')
+      setTrips(tripsData.trips)
     }
   }, [])
 

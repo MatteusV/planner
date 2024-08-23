@@ -11,32 +11,33 @@ import {
 } from '@/components/ui/drawer'
 import { Textarea } from '@/components/ui/textarea'
 import { IncomingMessage } from '@/components/incoming-message'
-import { socket } from '@/socket'
 import { MessageCircleMore, Send } from 'lucide-react'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { UserMessage } from '@/components/user-message'
-import { getParticipantByEmail } from '@/app/api/server-actions/get-participant-by-email'
-import { toast } from 'sonner'
+import { api } from '@/lib/axios'
+import { io } from 'socket.io-client'
+import { getCookie } from '@/app/api/server-actions/get-cookie'
 
 interface Message {
   content: string
-  ownerMessageName: string
-  ownerMessageEmail: string
-  userId?: string
-  tripId: string
+  participant_id?: string
+  user_id?: string
+  trip_id: string
 }
 
 interface Guest {
   id: string
   name: string
   email: string
+  is_confirmed: boolean
+  is_owner: boolean
+  trip_id: string
 }
 
 interface User {
   id: string
   name: string
   email: string
-  password: string
   image_url: string | null
 }
 
@@ -49,69 +50,53 @@ interface FetchMessage {
   content: string
   trip_id: string
   user_id: string | null
-  participant: { id: string; name: string } | null
-  user: { id: string; name: string; image_url: string } | null
+  participant?: { id: string; name: string } | null
+  user?: { id: string; name: string; image_url: string } | null
   created_at: Date
 }
+
+const socket = io('ws://localhost:3000')
 
 export function ModalChat({ tripId }: ModalChatProps) {
   const [newMessage, setNewMessage] = useState('')
   const [hasNewMessages, setHasNewMessages] = useState(false)
   const [messages, setMessages] = useState<FetchMessage[]>([])
-  const [guestPayload, setGuestPayload] = useState<Guest | null>()
+  const [guestPayload, setGuestPayload] = useState<Guest>()
   const [user, setUser] = useState<User>()
 
   useEffect(() => {
-    const guest = window.localStorage.getItem('guest')
+    async function getTokenJwt() {
+      const { tokenJwt } = await getCookie({ title: '@planner:tokenJwt' })
 
-    if (guest) {
-      const guestJson = JSON.parse(guest)
-      getParticipantByEmail({
-        email: guestJson.email,
-        name: guestJson.name,
-        tripId,
-      }).then((response) => {
-        if (response.participantNotFound === true) {
-          toast.error('Não foi possivel encontrar seus dados na viagem.')
+      if (tokenJwt) {
+        const { data, status } = await api.get('auth/profile')
+        if (status === 200) {
+          setUser(data.user)
         }
-
-        if (response.participantId) {
-          setGuestPayload({
-            id: response.participantId,
-            email: response.email,
-            name: response.name,
-          })
-        }
-      })
-    } else {
-      fetch(`/api/user/token`, {
-        method: 'GET',
-      }).then(async (response) => {
-        const responseJson = await response.json()
-        if (response.status === 200) setUser(responseJson.user)
-      })
-    }
-
-    socket.emit('fetch messages', tripId)
-
-    socket.on('get messages', (messagesFromServer: FetchMessage[]) => {
-      const newMessages = messagesFromServer.filter(
-        (msgFromServer) =>
-          !messages.some((oldMsg) => oldMsg.id === msgFromServer.id),
-      )
-
-      if (newMessages.length > 0) {
-        setMessages((prev) => [...prev, ...newMessages])
-        setHasNewMessages(true)
       }
-    })
-
-    return () => {
-      socket.off('connect')
-      socket.off('disconnect')
-      socket.off('get messages')
     }
-  }, [tripId, messages])
+
+    const guest = window.localStorage.getItem('guest')
+    if (guest) {
+      setGuestPayload(JSON.parse(guest))
+    } else {
+      getTokenJwt()
+    }
+
+    socket.emit('findAllMessages', tripId)
+    socket.on('messages', (receivedMessages) => {
+      setMessages(receivedMessages)
+    })
+    socket.on('newMessage', (newMessage) => {
+      setMessages((prevMessages) => {
+        if (prevMessages.length > 0) {
+          return [...prevMessages, newMessage]
+        } else {
+          return newMessage
+        }
+      })
+    })
+  }, [tripId])
 
   function handleNewMessage(event: ChangeEvent<HTMLTextAreaElement>) {
     if (event.target.value.length === 0) {
@@ -123,29 +108,21 @@ export function ModalChat({ tripId }: ModalChatProps) {
 
   function sendMessage() {
     if (newMessage) {
-      let message: Message
-
       if (user) {
-        message = {
+        const message: Message = {
           content: newMessage,
-          ownerMessageName: user.name,
-          ownerMessageEmail: user.email,
-          userId: user.id,
-          tripId,
+          trip_id: tripId,
+          user_id: user.id,
         }
-
-        setNewMessage('')
-        socket.emit('new message', message)
-      } else if (guestPayload) {
-        message = {
+        socket.emit('createMessage', message)
+      } else {
+        const message: Message = {
           content: newMessage,
-          ownerMessageName: guestPayload.name,
-          ownerMessageEmail: guestPayload.email,
-          tripId,
+          trip_id: tripId,
+          participant_id: guestPayload?.id,
         }
-
-        setNewMessage('')
-        socket.emit('new message', message)
+        console.log({ guestPayload, message })
+        socket.emit('createMessage', message)
       }
     }
   }
