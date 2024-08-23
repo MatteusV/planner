@@ -2,7 +2,7 @@ import Axios from 'axios'
 import { setupCache } from 'axios-cache-interceptor'
 
 const instance = Axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'https://planner-nest-production.up.railway.app',
   withCredentials: true,
 })
 const axios = setupCache(instance, {
