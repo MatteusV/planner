@@ -46,7 +46,7 @@ export function LoginModal() {
     const email = dataForm.get('email')?.toString()
     const password = dataForm.get('password')?.toString()
 
-    const { status, data } = await api.post('/auth', {
+    const { status } = await api.post('/auth', {
       email,
       password,
     })
@@ -60,16 +60,16 @@ export function LoginModal() {
 
       if (!tokenJwt) {
         toast.error('Erro ao salvar os cookies.')
-        const { success } = await createCookie({
-          title: '@planner:tokenJwt',
-          content: data.token,
-        })
+        // const { success } = await createCookie({
+        //   title: '@planner:tokenJwt',
+        //   content: data.token,
+        // })
 
-        if (success) {
-          toast.success('Login feito.')
-        } else {
-          toast.error('Erro ao salvar o token.')
-        }
+        // if (success) {
+        //   toast.success('Login feito.')
+        // } else {
+        toast.error('Erro ao salvar o token.')
+        // }
       }
       toast.success('Login feito.')
 
