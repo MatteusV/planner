@@ -61,7 +61,7 @@ export function LoginModal() {
       if (!tokenJwt) {
         toast.error('Erro ao salvar os cookies.')
         const { success } = await createCookie({
-          title: '@planner:tokeJwt',
+          title: '@planner:tokenJwt',
           content: data.token,
         })
 
