@@ -55,7 +55,7 @@ interface FetchMessage {
   created_at: Date
 }
 
-const socket = io('ws://localhost:3000')
+const socket = io('ws://planner-nest-production.up.railway.app')
 
 export function ModalChat({ tripId }: ModalChatProps) {
   const [newMessage, setNewMessage] = useState('')
