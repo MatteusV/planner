@@ -82,9 +82,7 @@ export default function TripDetailsPage() {
   const router = useRouter()
   useEffect(() => {
     async function fetchData() {
-      const { data, status } = await api.get(
-        `http://localhost:3000/trips/${tripId}`,
-      )
+      const { data, status } = await api.get(`/trips/${tripId}`)
 
       if (status === 404) {
         toast.error('Viagem não foi encontrada.')
