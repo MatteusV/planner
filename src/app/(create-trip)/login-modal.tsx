@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { Button } from '../../components/button'
 import { api } from '@/lib/axios'
 import { getCookie } from '../server-actions/get-cookie'
-// import { createCookie } from '../server-actions/create-cookie'
+import { createCookie } from '../server-actions/create-cookie'
 
 export function LoginModal() {
   const [showPassword, setShowPassword] = useState(false)
@@ -46,7 +46,7 @@ export function LoginModal() {
     const email = dataForm.get('email')?.toString()
     const password = dataForm.get('password')?.toString()
 
-    const { status } = await api.post('/auth', {
+    const { status, data } = await api.post('/auth', {
       email,
       password,
     })
@@ -59,16 +59,16 @@ export function LoginModal() {
       const { tokenJwt } = await getCookie({ title: '@planner:tokenJwt' })
 
       if (!tokenJwt) {
-        // const { success } = await createCookie({
-        //   title: '@planner:tokenJwt',
-        //   content: data.token,
-        // })
+        const { success } = await createCookie({
+          title: '@planner:tokenJwt',
+          content: data.token,
+        })
 
-        // if (success) {
-        //   toast.success('Login feito.')
-        // } else {
-        toast.error('Erro ao salvar o token.')
-        // }
+        if (success) {
+          toast.success('Login feito.')
+        } else {
+          toast.error('Erro ao salvar o token.')
+        }
       }
       toast.success('Login feito.')
 

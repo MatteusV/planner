@@ -45,8 +45,7 @@ export default function CreateTripPage() {
   const router = useRouter()
 
   useEffect(() => {
-    getCookie({ title: '@planner:tokenJwt' }).then((response) => {
-      const { tokenJwt } = response
+    getCookie({ title: '@planner:tokenJwt' }).then(({ tokenJwt }) => {
       if (tokenJwt) {
         setRefreshToken(tokenJwt.value)
         setIsLoginModalOpen(false)
