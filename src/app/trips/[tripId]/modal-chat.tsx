@@ -16,7 +16,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { UserMessage } from '@/components/user-message'
 import { api } from '@/lib/axios'
 import { io } from 'socket.io-client'
-import { getCookie } from '@/app/api/server-actions/get-cookie'
+import { getCookie } from '@/app/server-actions/get-cookie'
 
 interface Message {
   content: string

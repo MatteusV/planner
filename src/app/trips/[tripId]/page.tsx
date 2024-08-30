@@ -16,7 +16,7 @@ import { UploadImage } from './upload-image'
 import { useParams, useRouter } from 'next/navigation'
 import { ModalGuest } from './modal-guest'
 import { ModalChat } from './modal-chat'
-import { getCookie } from '@/app/api/server-actions/get-cookie'
+import { getCookie } from '@/app/server-actions/get-cookie'
 import { api } from '@/lib/axios'
 
 interface Guest {

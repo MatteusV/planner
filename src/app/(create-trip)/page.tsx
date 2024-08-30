@@ -20,7 +20,7 @@ import { InviteGuestsStep } from './steps/invite-guests-step'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { api } from '@/lib/axios'
-import { getCookie } from '../api/server-actions/get-cookie'
+import { getCookie } from '../server-actions/get-cookie'
 
 interface UsersToInvite {
   name: string

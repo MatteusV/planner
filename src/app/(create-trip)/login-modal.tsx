@@ -6,8 +6,8 @@ import { toast } from 'sonner'
 
 import { Button } from '../../components/button'
 import { api } from '@/lib/axios'
-import { getCookie } from '../api/server-actions/get-cookie'
-import { createCookie } from '../api/server-actions/create-cookie'
+import { getCookie } from '../server-actions/get-cookie'
+import { createCookie } from '../server-actions/create-cookie'
 
 export function LoginModal() {
   const [showPassword, setShowPassword] = useState(false)

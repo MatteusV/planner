@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 import { CardTrip } from '@/components/card-trip'
 import { Header } from '@/components/header'
-import { getCookie } from '@/app/api/server-actions/get-cookie'
+import { getCookie } from '@/app/server-actions/get-cookie'
 import { api } from '@/lib/axios'
 import { toast } from 'sonner'
 
