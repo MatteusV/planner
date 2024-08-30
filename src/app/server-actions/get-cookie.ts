@@ -2,11 +2,11 @@
 
 import { cookies } from 'next/headers'
 
-interface getCookieProsp {
+interface getCookieProps {
   title: string
 }
 
-export async function getCookie({ title }: getCookieProsp) {
+export async function getCookie({ title }: getCookieProps) {
   const cookieStore = cookies()
 
   const tokenJwt = cookieStore.get(title)
