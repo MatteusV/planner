@@ -4,6 +4,7 @@ import { FormEvent } from 'react'
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { api } from '@/lib/axios'
+import { getCookie } from '@/app/server-actions/get-cookie'
 
 interface CreateActivityModalProps {
   closeCreateActivityModal: () => void
@@ -16,7 +17,6 @@ export function CreateActivityModal({
 
   async function createActivity(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-
     const data = new FormData(event.currentTarget)
 
     const title = data.get('title')?.toString()

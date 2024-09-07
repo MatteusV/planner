@@ -31,9 +31,9 @@ export function ModalGuest({ setOpenModalGuest }: ModalGuest) {
     )
 
     if (status !== 401) {
-      toast.success('Fique por dentro das atividades.')
       const participant = response.data.participant
       window.localStorage.setItem('guest', JSON.stringify(participant))
+      window.location.reload()
       setOpenModalGuest(false)
     } else if (status === 401) {
       toast.error('Você não foi convidado para a viagem.')
@@ -60,7 +60,7 @@ export function ModalGuest({ setOpenModalGuest }: ModalGuest) {
               <User className="text-zinc-400 size-5" />
               <input
                 name="name"
-                id="email"
+                id="name"
                 placeholder="Qual é o seu nome?"
                 className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
               />

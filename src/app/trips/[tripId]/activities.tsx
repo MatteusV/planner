@@ -1,7 +1,9 @@
 'use client'
+import { api } from '@/lib/axios'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { CircleCheck, CircleX, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface ActivitiesProps {
   guestPayload?: { name: string; email: string }
@@ -20,15 +22,15 @@ interface ActivitiesProps {
 
 export function Activities({ guestPayload, activities }: ActivitiesProps) {
   async function handleDeleteActivity(activityId: string) {
-    console.log(activityId)
-    // if (status === 200) {
-    //   toast.success('Atividade deletada.')
-    //   setTimeout(() => {
-    //     window.location.reload()
-    //   }, 800)
-    // } else {
-    //   toast.error('Não foi possivel deletar a atividade.')
-    // }
+    const { status } = await api.delete(`/activities/${activityId}`)
+    if (status === 200) {
+      toast.success('Atividade deletada.')
+      setTimeout(() => {
+        window.location.reload()
+      }, 800)
+    } else {
+      toast.error('Não foi possivel deletar a atividade.')
+    }
   }
 
   if (!activities || activities.length === 0) {

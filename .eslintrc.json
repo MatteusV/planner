@@ -1,6 +1,7 @@
 {
   "extends": ["@rocketseat/eslint-config/react", "next/core-web-vitals"],
   "rules": {
-    "camelcase": "off" // Desabilita a regra camelcase
+    "camelcase": "off", // Desabilita a regra camelcase
+    "@typescript-eslint/no-unused-vars": "off"
   }
 }

@@ -35,17 +35,17 @@ export function UploadImage({ tripId, guestPayload }: UploadImageProsp) {
       return
     }
     setFormIsSubmitting(true)
-
     const formData = new FormData()
-    formData.append('image', image)
-    const teste = formData.get('image')
-
-    const { status, data } = await api.post(`/trips/${tripId}/image`, {
-      teste,
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    formData.append('file', image)
+    const { status, data } = await api.post(
+      `/trips/${tripId}/image`,
+      formData,
+      {
+        headers: {
+          'content-type': 'multipart/form-data',
+        },
       },
-    })
+    )
 
     if (status !== 200) {
       toast.error('Erro ao fazer o upload da imagem')
